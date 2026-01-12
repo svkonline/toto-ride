@@ -13,13 +13,13 @@
     "socket.io": "^4.7.2",
     "firebase-admin": "^11.11.0",
     "dotenv": "^16.3.1",
-    "cors": "^2.8.5"
-  },
-  "devDependencies": {
+    "cors": "^2.8.5",
     "typescript": "^5.2.2",
-    "ts-node-dev": "^2.0.0",
     "@types/express": "^4.17.18",
     "@types/node": "^20.8.2",
     "@types/cors": "^2.8.14"
+  },
+  "devDependencies": {
+    "ts-node-dev": "^2.0.0"
   }
 }

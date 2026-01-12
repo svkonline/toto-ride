@@ -25,8 +25,8 @@ function App() {
   const fetchData = async () => {
     try {
       const [statsRes, driversRes] = await Promise.all([
-        axios.get('http://localhost:3000/api/admin/stats'),
-        axios.get('http://localhost:3000/api/admin/drivers')
+        axios.get('https://toto-ride.onrender.com/api/admin/stats'),
+        axios.get('https://toto-ride.onrender.com/api/admin/drivers')
       ]);
       setStats(statsRes.data);
       setDrivers(driversRes.data);
@@ -45,7 +45,7 @@ function App() {
 
   const handleStatusUpdate = async (id: string, status: 'APPROVED' | 'REJECTED') => {
     try {
-      await axios.post(`http://localhost:3000/api/admin/driver/${id}/status`, { status });
+      await axios.post(`https://toto-ride.onrender.com/api/admin/driver/${id}/status`, { status });
       // Optimistic update or refetch
       fetchData();
     } catch (error) {

@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:3000'; // Web localhost
+  static const String baseUrl = 'https://toto-ride.onrender.com'; // Live Backend
   late IO.Socket socket;
 
   void initSocket() {

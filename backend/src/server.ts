@@ -55,6 +55,29 @@ app.post('/api/auth/driver/login', async (req, res) => {
     }
 });
 
+// Passenger Auth Routes
+app.post('/api/auth/passenger/register', async (req, res) => {
+    try {
+        const { phone, name, pin } = req.body;
+        if (!phone || !name || !pin) return res.status(400).json({ error: 'Missing fields' });
+        const user = await authService.registerPassenger(phone, name, pin);
+        res.json(user);
+    } catch (e: any) {
+        res.status(400).json({ error: e.message });
+    }
+});
+
+app.post('/api/auth/passenger/login', async (req, res) => {
+    try {
+        const { phone, pin } = req.body;
+        if (!phone || !pin) return res.status(400).json({ error: 'Missing fields' });
+        const result = await authService.loginPassenger(phone, pin);
+        res.json(result);
+    } catch (e: any) {
+        res.status(401).json({ error: e.message });
+    }
+});
+
 app.post('/api/ride/request', (req, res) => {
     const request = req.body; // Validate types in real app
     const ride = rideService.createRideRequest(request);

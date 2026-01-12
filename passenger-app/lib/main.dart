@@ -46,12 +46,80 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _api.initSocket();
     
+    // Show Login Dialog
+    WidgetsBinding.instance.addPostFrameCallback((_) => _showLoginDialog());
+
     // Listen for drivers moving
     _api.listenForDrivers((data) {
       if (data['lat'] != null && data['lng'] != null) {
         _updateDriverMarker(data['driverId'], LatLng(data['lat'], data['lng']));
       }
     });
+  }
+
+  void _showLoginDialog() {
+    final phoneController = TextEditingController();
+    final pinController = TextEditingController();
+    final nameController = TextEditingController();
+    bool isRegister = false;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Text(isRegister ? 'Passenger Register' : 'Passenger Login'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: phoneController,
+                  decoration: const InputDecoration(labelText: 'Phone Number'),
+                  keyboardType: TextInputType.phone,
+                ),
+                if (isRegister)
+                  TextField(
+                    controller: nameController,
+                    decoration: const InputDecoration(labelText: 'Full Name'),
+                  ),
+                TextField(
+                  controller: pinController,
+                  decoration: const InputDecoration(labelText: '4-Digit PIN'),
+                  keyboardType: TextInputType.number,
+                  obscureText: true,
+                ),
+                TextButton(
+                  onPressed: () => setState(() => isRegister = !isRegister),
+                  child: Text(isRegister ? 'Login' : 'Register'),
+                )
+              ],
+            ),
+            actions: [
+              ElevatedButton(
+                onPressed: () async {
+                  try {
+                    if (isRegister) {
+                      await _api.register(phoneController.text, nameController.text, pinController.text);
+                      if (!mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Registered!')));
+                      setState(() => isRegister = false);
+                    } else {
+                      await _api.login(phoneController.text, pinController.text);
+                       if (!mounted) return;
+                      Navigator.pop(ctx);
+                    }
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                  }
+                },
+                child: Text(isRegister ? 'Register' : 'Login'),
+              )
+            ],
+          );
+        }
+      )
+    );
   }
 
   void _updateDriverMarker(String driverId, LatLng position) {

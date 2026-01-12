@@ -1,47 +1,51 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import * as driverService from './driverService';
+import * as passengerService from './passengerService';
 
 const SECRET_KEY = process.env.JWT_SECRET || 'super_secret_key_123';
 
+// --- DRIVER AUTH ---
 export const registerDriver = async (phone: string, name: string, pin: string) => {
-    // 1. Check if driver exists (optional for MVP)
+    // ... (existing logic)
     const existing = driverService.findDriverByPhone(phone);
-    if (existing) {
-        throw new Error('Driver already exists');
-    }
+    if (existing) throw new Error('Driver already exists');
 
-    // 2. Hash PIN
     const salt = await bcrypt.genSalt(10);
     const pinHash = await bcrypt.hash(pin, salt);
-
-    // 3. Register Driver
-    const driver = driverService.registerDriver(phone, name, pinHash);
-    return driver;
+    return driverService.registerDriver(phone, name, pinHash);
 };
 
 export const loginDriver = async (phone: string, pin: string) => {
-    // 1. Find Driver
     const driver = driverService.findDriverByPhone(phone);
-    if (!driver) {
-        throw new Error('Driver not found');
-    }
-
-    // 2. Verify PIN
-    if (!driver.pinHash) {
-        // Fallback for old drivers without PIN (MVP transition)
-        // Ensure they can't login or treating empty PIN as valid? 
-        // Better: Fail.
-        throw new Error('Please register again to set a PIN');
-    }
+    if (!driver) throw new Error('Driver not found');
+    if (!driver.pinHash) throw new Error('Please register again to set a PIN');
 
     const isMatch = await bcrypt.compare(pin, driver.pinHash);
-    if (!isMatch) {
-        throw new Error('Invalid PIN');
-    }
+    if (!isMatch) throw new Error('Invalid PIN');
 
-    // 3. Generate Token
     const token = jwt.sign({ id: driver.id, role: 'driver' }, SECRET_KEY, { expiresIn: '7d' });
-
     return { driver, token };
+};
+
+// --- PASSENGER AUTH ---
+export const registerPassenger = async (phone: string, name: string, pin: string) => {
+    const existing = passengerService.findPassengerByPhone(phone);
+    if (existing) throw new Error('User already exists');
+
+    const salt = await bcrypt.genSalt(10);
+    const pinHash = await bcrypt.hash(pin, salt);
+    return passengerService.registerPassenger(phone, name, pinHash);
+};
+
+export const loginPassenger = async (phone: string, pin: string) => {
+    const user = passengerService.findPassengerByPhone(phone);
+    if (!user) throw new Error('User not found');
+    if (!user.pinHash) throw new Error('Please register again');
+
+    const isMatch = await bcrypt.compare(pin, user.pinHash);
+    if (!isMatch) throw new Error('Invalid PIN');
+
+    const token = jwt.sign({ id: user.id, role: 'passenger' }, SECRET_KEY, { expiresIn: '7d' });
+    return { user, token };
 };

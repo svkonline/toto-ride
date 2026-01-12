@@ -24,13 +24,35 @@ app.use(cors());
 app.use(express.json());
 
 // Routes (Inline for MVP simplicity)
-app.post('/api/driver/register', (req, res) => {
-    const { phone, name } = req.body;
-    if (!phone || !name) {
-        return res.status(400).json({ error: 'Missing fields' });
+import * as authService from './services/authService';
+
+// ...
+
+// Routes
+app.post('/api/auth/driver/register', async (req, res) => {
+    try {
+        const { phone, name, pin } = req.body;
+        if (!phone || !name || !pin) {
+            return res.status(400).json({ error: 'Missing fields' });
+        }
+        const driver = await authService.registerDriver(phone, name, pin);
+        res.json(driver);
+    } catch (e: any) {
+        res.status(400).json({ error: e.message });
     }
-    const driver = driverService.registerDriver(phone, name);
-    res.json(driver);
+});
+
+app.post('/api/auth/driver/login', async (req, res) => {
+    try {
+        const { phone, pin } = req.body;
+        if (!phone || !pin) {
+            return res.status(400).json({ error: 'Missing fields' });
+        }
+        const result = await authService.loginDriver(phone, pin);
+        res.json(result);
+    } catch (e: any) {
+        res.status(401).json({ error: e.message });
+    }
 });
 
 app.post('/api/ride/request', (req, res) => {

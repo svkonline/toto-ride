@@ -11,6 +11,7 @@ export interface Driver {
         lng: number;
     };
     socketId?: string;
+    pinHash?: string; // For Auth
 }
 
 export interface RideRequest {

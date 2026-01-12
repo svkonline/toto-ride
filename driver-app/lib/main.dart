@@ -43,15 +43,83 @@ class _DriverHomePageState extends State<DriverHomePage> {
   void initState() {
     super.initState();
     _service.initSocket();
-    _service.register('9876543210', 'Toto Driver 1');
+    
+    // Show Login Dialog after build
+    WidgetsBinding.instance.addPostFrameCallback((_) => _showLoginDialog());
 
     _service.listenForRides((data) {
       if (!mounted) return;
       _showRideRequestDialog(data);
     });
 
-    // Check location permission initially
     _checkLocationPermission();
+  }
+
+  void _showLoginDialog() {
+    final phoneController = TextEditingController();
+    final pinController = TextEditingController();
+    final nameController = TextEditingController(); // Only for register
+    bool isRegister = false;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Text(isRegister ? 'Driver Register' : 'Driver Login'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: phoneController,
+                  decoration: const InputDecoration(labelText: 'Phone Number'),
+                  keyboardType: TextInputType.phone,
+                ),
+                if (isRegister)
+                  TextField(
+                    controller: nameController,
+                    decoration: const InputDecoration(labelText: 'Full Name'),
+                  ),
+                TextField(
+                  controller: pinController,
+                  decoration: const InputDecoration(labelText: '4-Digit PIN'),
+                  keyboardType: TextInputType.number,
+                  obscureText: true,
+                ),
+                TextButton(
+                  onPressed: () => setState(() => isRegister = !isRegister),
+                  child: Text(isRegister ? 'Already have account? Login' : 'New Driver? Register'),
+                )
+              ],
+            ),
+            actions: [
+              ElevatedButton(
+                onPressed: () async {
+                  try {
+                    if (isRegister) {
+                      await _service.register(phoneController.text, nameController.text, pinController.text);
+                      // Auto login after register or just show success
+                      if (!mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Registered! Please Login.')));
+                      setState(() => isRegister = false);
+                    } else {
+                      await _service.login(phoneController.text, pinController.text);
+                       if (!mounted) return;
+                      Navigator.pop(ctx);
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Login Successful!')));
+                    }
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                  }
+                },
+                child: Text(isRegister ? 'Register' : 'Login'),
+              )
+            ],
+          );
+        }
+      )
+    );
   }
 
   Future<void> _checkLocationPermission() async {

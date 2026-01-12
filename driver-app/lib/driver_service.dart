@@ -58,6 +58,20 @@ class DriverService {
     }
   }
 
+  Future<void> updateUpiId(String upiId) async {
+    if (driverId == null) throw Exception('Driver not logged in');
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/driver/$driverId/upi'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'upiId': upiId}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update UPI ID: ${response.body}');
+    }
+  }
+
   void acceptRide(String rideId) {
     if (driverId != null) {
       socket.emit('accept_ride', {

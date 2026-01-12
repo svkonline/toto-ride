@@ -24,9 +24,12 @@ export const findNearbyDrivers = (lat: number, lng: number): Driver[] => {
 
 export const acceptRide = (rideId: string, driverId: string): Ride | null => {
     const ride = rides.get(rideId);
-    if (ride && ride.status === 'REQUESTED') {
+    const driver = driverService.getAllOnlineDrivers().find(d => d.id === driverId); // Simple lookup
+
+    if (ride && ride.status === 'REQUESTED' && driver) {
         ride.status = 'ACCEPTED';
         ride.driverId = driverId;
+        ride.driverUpiId = driver.upiId;
         return ride;
     }
     return null;

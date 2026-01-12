@@ -169,6 +169,38 @@ class _DriverHomePageState extends State<DriverHomePage> {
     );
   }
 
+  void _showUpiDialog() {
+    final upiController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Set UPI ID'),
+        content: TextField(
+          controller: upiController,
+          decoration: const InputDecoration(
+            labelText: 'UPI ID (e.g., 9876543210@ybl)',
+            hintText: 'Enter your VPA'
+          ),
+        ),
+        actions: [
+          ElevatedButton(
+            child: const Text('Save'),
+            onPressed: () async {
+              try {
+                await _service.updateUpiId(upiController.text);
+                 if (!mounted) return;
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('UPI ID Updated!')));
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+              }
+            }
+          )
+        ]
+      )
+    );
+  }
+
   void _toggleOnline() async {
     if (!isOnline) {
       _startTracking();
@@ -219,16 +251,27 @@ class _DriverHomePageState extends State<DriverHomePage> {
           SafeArea(
             child: Align(
               alignment: Alignment.topCenter,
-              child: Card(
-                margin: const EdgeInsets.all(16),
-                color: isOnline ? Colors.green : Colors.grey[800],
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  child: Text(
-                    isOnline ? 'ONLINE' : 'OFFLINE',
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+              child: Column( // use column to stack online status and UPI button
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Card(
+                    margin: const EdgeInsets.all(16),
+                    color: isOnline ? Colors.green : Colors.grey[800],
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      child: Text(
+                        isOnline ? 'ONLINE' : 'OFFLINE',
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                    ),
                   ),
-                ),
+                  if (!isOnline) // Only allow editing UPI when offline
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.payment),
+                      label: const Text('Set UPI ID'),
+                      onPressed: _showUpiDialog,
+                    ),
+                ],
               ),
             ),
           ),

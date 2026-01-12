@@ -33,6 +33,7 @@ export interface RideRequest {
 export interface Ride extends RideRequest {
     id: string;
     driverId?: string;
+    driverUpiId?: string; // Propagate driver's UPI to ride
     status: 'REQUESTED' | 'ACCEPTED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 }
 

@@ -23,6 +23,10 @@ const io = new Server(httpServer, {
 app.use(cors());
 app.use(express.json());
 
+app.get('/', (req, res) => {
+    res.send('Toto Ride Backend is Running 🛺');
+});
+
 // Routes (Inline for MVP simplicity)
 import * as authService from './services/authService';
 
@@ -168,7 +172,7 @@ io.on('connection', (socket) => {
     });
 });
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });

@@ -2,26 +2,26 @@ const axios = require('axios');
 
 const BASE_URL = 'https://toto-ride.onrender.com';
 
+async function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function checkHealth() {
-    console.log('Checking Server Connectivity...');
+    console.log('Checking Server Connectivity (Max wait: 2 mins)...');
 
-    // 1. Check Root
-    try {
-        console.log('1. Pinging Root / ...');
-        const res1 = await axios.get(`${BASE_URL}/`, { timeout: 5000 });
-        console.log('✅ Root OK:', res1.data);
-    } catch (e) {
-        console.error('❌ Root Fail:', e.message);
+    for (let i = 0; i < 24; i++) { // 24 * 5s = 120s
+        try {
+            console.log(`Attempt ${i + 1}: Pinging Root...`);
+            const res = await axios.get(`${BASE_URL}/`, { timeout: 10000 });
+            console.log('✅ SUCCESS! Server is Online.');
+            console.log('   Response:', res.data);
+            return;
+        } catch (e) {
+            console.log(`   Waiting... (${e.message})`); // e.g. timeout or connection refused
+            await wait(5000); // Wait 5s before retry
+        }
     }
-
-    // 2. Check Stats
-    try {
-        console.log('2. Pinging /api/admin/stats ...');
-        const res2 = await axios.get(`${BASE_URL}/api/admin/stats`, { timeout: 5000 });
-        console.log('✅ Stats OK:', res2.data);
-    } catch (e) {
-        console.error('❌ Stats Fail:', e.message);
-    }
+    console.error('❌ Failed to connect after 2 minutes.');
 }
 
 checkHealth();

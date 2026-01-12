@@ -54,3 +54,12 @@ export const updateDriverLocation = (id: string, lat: number, lng: number): Driv
 export const getAllOnlineDrivers = (): Driver[] => {
     return Array.from(drivers.values()).filter(d => d.isOnline);
 };
+
+export const updateDriverUpi = (id: string, upiId: string): Driver | undefined => {
+    const driver = drivers.get(id);
+    if (driver) {
+        driver.upiId = upiId;
+        return driver;
+    }
+    return undefined;
+};

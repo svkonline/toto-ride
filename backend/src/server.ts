@@ -148,6 +148,18 @@ app.post('/api/admin/driver/:id/status', (req, res) => {
     }
 });
 
+app.post('/api/driver/:id/upi', (req, res) => {
+    const { upiId } = req.body;
+    if (!upiId) return res.status(400).json({ error: 'Missing UPI ID' });
+
+    const driver = driverService.updateDriverUpi(req.params.id, upiId);
+    if (driver) {
+        res.json(driver);
+    } else {
+        res.status(404).json({ error: 'Driver not found' });
+    }
+});
+
 // Socket.io connection
 io.on('connection', (socket) => {
     console.log('User connected:', socket.id);

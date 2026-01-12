@@ -12,6 +12,7 @@ export interface Driver {
     };
     socketId?: string;
     pinHash?: string; // For Auth
+    upiId?: string; // For Payments
 }
 
 export interface RideRequest {
